@@ -37,7 +37,6 @@ class Music(commands.Cog):
             # Join the channel
             self.voice_client = await vc.connect()
             await ctx.send('Joined {}'.format(vc))
-            await ctx.message.delete()
 
             # Play song
             #source = await discord.FFmpegOpusAudio.from_probe("/Users/fhenneman/Documents/GitHub/Ana/BR2049_Mesa.mp3")

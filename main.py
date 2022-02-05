@@ -21,7 +21,11 @@ class DiscordBot(commands.Bot):
     async def on_message(self, message):
         await self.get_cog("Moderation").handle(message) # Send the message to a specific cog to use
         await self.process_commands(message) # Still have discord process the potential command normally
-    
+    # Event on_reaction_add
+    async def on_reaction_add(self, reaction: discord.Reaction, user: discord.Member):
+        await self.get_cog("Soundboard").on_reaction_add(reaction, user)
+
+
     # Event: on_command_error
     async def on_command_error(self, ctx: commands.Context, error):
         if isinstance(error, commands.CommandOnCooldown):

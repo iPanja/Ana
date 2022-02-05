@@ -1,4 +1,4 @@
-import discord, random, difflib, requests, os
+import discord, random, difflib, requests, os, math
 from discord.ext import commands
 from discord.ext.commands import group
 
@@ -30,11 +30,16 @@ class Soundboard(commands.Cog):
             return
         a: discord.Attachment
         for a in ctx.message.attachments:
-            #Save
+            # Check file size
+            if(a.size > self.config['Music']['max_file_size']):
+                await ctx.send(f"**That file size is too large, the config only allows up to {self.config['Music']['max_file_size']/(math.pow(10, 6))} MB per file.**")
+                return
+            # Check file extension
             ext: str = a.filename.split('.')[-1]
             if not ext in self.config['Music']['safe_extensions']:
                 await ctx.send(f"**That file extension is not supported, please whitelist it in the config!**")
                 return
+            # Save file locally (to Ana/files/<filename>)
             filename = name + '.' + ext
             await a.save('files/' + filename)
             await ctx.send(f"Saved audio as {filename}, use `ana soundboard play {filename}` to play it.")
@@ -46,8 +51,10 @@ class Soundboard(commands.Cog):
         name = '_'.join(ctx.message.content.lower().split(' ')[index::]) #Get name
         # Attempt to play file
         await ctx.invoke(self.bot.get_command('connect'))
-        #Prepend a '.' to indicate its a local file rather than a YT video id
+        # Prepend a '.' to indicate its a local file rather than a YT video id
         await ctx.invoke(self.bot.get_command('play_local'), filename=f".{name}")
+        # React to show acknowledgement
+        await ctx.message.add_reaction(random.choice(ctx.guild.emojis))
     
     @soundboard.group()
     async def list(self, ctx: commands.Context):
@@ -68,3 +75,7 @@ class Soundboard(commands.Cog):
             await ctx.send('Audio file not found!')
             return
         await ctx.send('Audio file deleted!')
+    
+    # /// Events (invoked by main.py)
+    async def on_reaction_add(self, reaction: discord.Reaction, user: discord.Member):
+        pass
