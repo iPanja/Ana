@@ -23,7 +23,8 @@ class DiscordBot(commands.Bot):
         await self.process_commands(message) # Still have discord process the potential command normally
     # Event on_reaction_add
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.Member):
-        await self.get_cog("Soundboard").on_reaction_add(reaction, user)
+        #await self.get_cog("Soundboard").on_reaction_add(reaction, user)
+        pass
 
 
     # Event: on_command_error

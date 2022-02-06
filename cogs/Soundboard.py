@@ -1,6 +1,7 @@
 import discord, random, difflib, requests, os, math
 from discord.ext import commands
 from discord.ext.commands import group
+from cogs.Music import Source, SourceType, Music
 
 def setup(bot):
     try:
@@ -43,18 +44,15 @@ class Soundboard(commands.Cog):
             filename = name + '.' + ext
             await a.save('files/' + filename)
             await ctx.send(f"Saved audio as {filename}, use `ana soundboard play {filename}` to play it.")
-
     @soundboard.group()
     async def play(self, ctx: commands.Context):
         # Get file name
         index = self.bot.command_prefix.count(' ') + 2 # Get location of where <name...> begins
         name = '_'.join(ctx.message.content.lower().split(' ')[index::]) #Get name
-        # Attempt to play file
-        await ctx.invoke(self.bot.get_command('connect'))
-        # Prepend a '.' to indicate its a local file rather than a YT video id
-        await ctx.invoke(self.bot.get_command('play_local'), filename=f".{name}")
-        # React to show acknowledgement
-        await ctx.message.add_reaction(random.choice(ctx.guild.emojis))
+        # Queue song (bot will auto join if necessary)
+        ctx.message.content = f"./{name}"
+        await ctx.invoke(self.bot.get_command("connect"))
+        await ctx.invoke(self.bot.get_command("play"))
     
     @soundboard.group()
     async def list(self, ctx: commands.Context):
@@ -75,7 +73,3 @@ class Soundboard(commands.Cog):
             await ctx.send('Audio file not found!')
             return
         await ctx.send('Audio file deleted!')
-    
-    # /// Events (invoked by main.py)
-    async def on_reaction_add(self, reaction: discord.Reaction, user: discord.Member):
-        pass
