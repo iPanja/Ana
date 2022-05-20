@@ -13,6 +13,7 @@ class Moderation(commands.Cog):
         self.bot = bot
         self.config = self.bot.config
         self.word_blacklist = self.config['Moderation']['blacklist']
+        self.auto_response = self.config['Moderation']['image_replies']
     
     # Helper method: checks if a word is in the config's blacklist
     def isBlacklisted(self, message):
@@ -20,6 +21,15 @@ class Moderation(commands.Cog):
             if word.lower() in message.content.lower():
                 return True
         return False
+    # Helper method: checks if a message contains a certain word that should be responded with an image
+    def getAutoResponse(self, message: str) -> discord.File:
+        message = message.lower()
+        for word in self.auto_response:
+            if word.lower() in message:
+                filename = f"files/{self.config['Moderation']['image_replies'][word.lower()]}"
+                return discord.File(open(filename, "rb"), filename=filename)
+        return None
+
     
     # Example command: deletes last 50 -> 150 messages in a text channel
     @commands.command(pass_context = True)
@@ -50,3 +60,11 @@ class Moderation(commands.Cog):
         if (isBlocked):
             await message.delete()
             await message.channel.send(self.config["Moderation"]["warning"].format(user=f"<@{message.author.id}>"))
+        file = self.getAutoResponse(message.content)
+        if not file is None:
+            await message.reply(files=[file], content='...')
+        """
+        if 'daddy' in message.content:
+            file = discord.File(filename='files/angry.jpg', fp = open('files/angry.jpg', 'rb'))
+            await message.reply(content="...", files=[file])
+            """

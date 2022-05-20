@@ -57,8 +57,11 @@ class Soundboard(commands.Cog):
     @soundboard.group()
     async def list(self, ctx: commands.Context):
         msg = "**Soundboard sounds:**\nUsage: `ana soundboard play <filename>`\n"
+        extensions = ['mp4', 'mp3', 'webm']
         for filename in os.listdir('files/'):
-            msg += f" *{filename}\n"
+            for extension in extensions:
+                if extension in filename:
+                    msg += f" • {filename}\n"
         await ctx.send(msg)
     
     @soundboard.group()

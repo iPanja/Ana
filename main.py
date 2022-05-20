@@ -18,14 +18,23 @@ class DiscordBot(commands.Bot):
         await self.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="from your walls"))
 
     # Event: on_message
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message):
         await self.get_cog("Moderation").handle(message) # Send the message to a specific cog to use
+        await self.get_cog("Vigil").on_message(message)
         await self.process_commands(message) # Still have discord process the potential command normally
-    # Event on_reaction_add
+    # Event: on_reaction_add
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.Member):
-        #await self.get_cog("Soundboard").on_reaction_add(reaction, user)
+        await self.get_cog("Vigil").on_reaction_add(reaction, user)
+    # Event: on_message_delete
+    async def on_message_delete(self, message: discord.Message):
+        await self.get_cog("Vigil").on_message_delete(message)
+    # Event: on_message_ban
+    async def on_member_ban(self, guild: discord.Guild, member: discord.Member):
+        await self.get_cog("Vigil").on_member_ban(guild, member)
+    # Event: on member_kick
+    async def on_member_kick(self, guild: discord.Guild, member: discord.Member):
+        await self.get_cog("Vigil").on_member_kick(guild, member)
         pass
-
 
     # Event: on_command_error
     async def on_command_error(self, ctx: commands.Context, error):
@@ -37,7 +46,7 @@ class DiscordBot(commands.Bot):
         raise error
     
 # Debugging
-os.chdir("/Users/fhenneman/Documents/GitHub/Ana/")
+os.chdir("/home/pi/Documents/Ana")
 
 # Load config file
 with open('config.toml', 'r') as file:
